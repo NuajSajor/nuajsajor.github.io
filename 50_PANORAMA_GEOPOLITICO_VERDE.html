@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Partida por el Siglo — Análisis de coyuntura</title>
+<style>
+:root{
+  --ink:#F4F6F2; --surface:#ffffff; --text:#18201b; --muted:#5b665e;
+  --verde:#2e7a59; --verde-soft:rgba(46,122,89,.12);
+  --ocre:#a9761f; --ocre-soft:rgba(169,118,31,.12);
+  --line:rgba(24,32,27,.14); --line-strong:rgba(24,32,27,.28);
+  --shadow:0 1px 2px rgba(24,32,27,.05),0 8px 30px rgba(24,32,27,.06);
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,'Times New Roman',serif;
+  --mono:ui-monospace,'SF Mono','JetBrains Mono','Cascadia Code',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#0e1311; --surface:#151c18; --text:#e9e7dd; --muted:#98a29a;
+    --verde:#63b08e; --verde-soft:rgba(99,176,142,.14);
+    --ocre:#d7a24c; --ocre-soft:rgba(215,162,76,.14);
+    --line:rgba(233,231,221,.13); --line-strong:rgba(233,231,221,.26);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="light"]{
+  --ink:#F4F6F2; --surface:#ffffff; --text:#18201b; --muted:#5b665e;
+  --verde:#2e7a59; --verde-soft:rgba(46,122,89,.12);
+  --ocre:#a9761f; --ocre-soft:rgba(169,118,31,.12);
+  --line:rgba(24,32,27,.14); --line-strong:rgba(24,32,27,.28);
+  --shadow:0 1px 2px rgba(24,32,27,.05),0 8px 30px rgba(24,32,27,.06);
+}
+:root[data-theme="dark"]{
+  --ink:#0e1311; --surface:#151c18; --text:#e9e7dd; --muted:#98a29a;
+  --verde:#63b08e; --verde-soft:rgba(99,176,142,.14);
+  --ocre:#d7a24c; --ocre-soft:rgba(215,162,76,.14);
+  --line:rgba(233,231,221,.13); --line-strong:rgba(233,231,221,.26);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ink); color:var(--text);
+  font-family:var(--serif); font-size:19px; line-height:1.68;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+.wrap{max-width:41rem; margin:0 auto; padding:0 1.25rem}
+p{margin:0 0 1.15em; hyphens:auto}
+strong{font-weight:700}
+a{color:var(--verde); text-underline-offset:2px}
+
+/* ---- utility / mono labels ---- */
+.eyebrow,.secnum,.kicker,.stat-label,.src h3,.audit-tag,.tablero-idx .n,.foot-mono{
+  font-family:var(--mono);
+}
+.eyebrow{
+  font-size:.72rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--verde); font-weight:600;
+}
+
+/* ---- theme toggle ---- */
+.toggle{
+  position:fixed; top:.85rem; right:.85rem; z-index:20;
+  font-family:var(--mono); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+  background:var(--surface); color:var(--muted); border:1px solid var(--line);
+  border-radius:999px; padding:.5rem .8rem; cursor:pointer; box-shadow:var(--shadow);
+}
+.toggle:hover{color:var(--text); border-color:var(--line-strong)}
+.toggle:focus-visible{outline:2px solid var(--verde); outline-offset:2px}
+
+/* ---- hero ---- */
+.hero{
+  position:relative; overflow:hidden;
+  border-bottom:1px solid var(--line);
+  padding:5.5rem 0 3rem;
+}
+.hero::before{
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:
+    linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 46px,
+    linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/46px 100%;
+  opacity:.5;
+  -webkit-mask-image:radial-gradient(120% 80% at 50% 0%,#000 25%,transparent 78%);
+          mask-image:radial-gradient(120% 80% at 50% 0%,#000 25%,transparent 78%);
+}
+.hero .wrap{position:relative; z-index:1}
+.hero .eyebrow{display:block; margin-bottom:1.4rem}
+h1{
+  font-family:var(--serif); font-weight:700;
+  font-size:clamp(2.5rem,8vw,4.15rem); line-height:1.02; letter-spacing:-.015em;
+  margin:0 0 .5rem; text-wrap:balance;
+}
+.subtitle{
+  font-size:clamp(1.12rem,3.4vw,1.4rem); font-style:italic; color:var(--muted);
+  margin:.2rem 0 0; text-wrap:balance;
+}
+.byline{
+  margin-top:2rem; font-family:var(--mono); font-size:.74rem; letter-spacing:.06em;
+  color:var(--muted); line-height:1.7;
+}
+
+/* ---- intro note ---- */
+.note{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:1.3rem 1.4rem; margin:2.4rem 0; box-shadow:var(--shadow);
+  font-size:.96rem; line-height:1.6;
+}
+.note p{margin:0 0 .7em}
+.note p:last-child{margin:0}
+.note .kicker{
+  display:block; font-size:.7rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ocre); font-weight:600; margin-bottom:.6rem;
+}
+
+/* ---- tablero index ---- */
+.tablero-idx{
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:var(--line); border:1px solid var(--line); border-radius:14px;
+  overflow:hidden; margin:2.6rem 0 1rem;
+}
+.tablero-idx > div{background:var(--surface); padding:1.15rem 1.15rem 1.25rem}
+.tablero-idx .n{
+  font-size:.78rem; color:var(--ocre); font-weight:600; letter-spacing:.05em;
+}
+.tablero-idx h4{
+  font-family:var(--serif); font-size:1.12rem; font-weight:700; margin:.35rem 0 .2rem;
+  line-height:1.15;
+}
+.tablero-idx p{font-size:.86rem; color:var(--muted); margin:0; line-height:1.5}
+
+/* ---- sections ---- */
+section{padding:2.7rem 0; border-bottom:1px solid var(--line)}
+.secnum{
+  display:block; font-size:.76rem; letter-spacing:.14em; color:var(--verde);
+  font-weight:600; margin-bottom:.5rem;
+}
+h2{
+  font-family:var(--serif); font-weight:700; letter-spacing:-.01em;
+  font-size:clamp(1.6rem,5vw,2.1rem); line-height:1.12; margin:0 0 1.1rem;
+  text-wrap:balance;
+}
+h3.lead{
+  font-family:var(--serif); font-weight:700; font-size:1.16rem;
+  margin:1.8rem 0 .6rem;
+}
+
+/* ---- pull quote (lectura de fondo) ---- */
+.pull{
+  margin:2.5rem 0; padding:1.4rem 0 0;
+  border-top:1px solid var(--line-strong);
+  font-size:1.26rem; line-height:1.46; font-style:italic;
+}
+.pull strong{font-style:normal}
+.pull .tag{
+  display:block; font-family:var(--mono); font-style:normal; font-weight:600;
+  font-size:.66rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--verde); margin-bottom:.55rem;
+}
+
+/* ---- stat / evidence block ---- */
+.stat{
+  background:var(--ocre-soft); border:1px solid var(--line); border-radius:12px;
+  padding:1.05rem 1.2rem; margin:1.7rem 0; display:flex; gap:1rem; align-items:baseline;
+}
+.stat .fig{
+  font-family:var(--mono); font-weight:700; color:var(--ocre);
+  font-size:clamp(1.5rem,6vw,2rem); line-height:1; font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.stat .txt{font-size:.92rem; line-height:1.5; color:var(--text)}
+.stat .stat-label{
+  display:block; font-size:.64rem; letter-spacing:.15em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:.25rem;
+}
+
+/* ---- evidence quote (documented case) ---- */
+.evidence{
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:12px;
+  padding:1.2rem 1.35rem; margin:1.6rem 0; box-shadow:var(--shadow);
+  font-size:1rem; line-height:1.58;
+}
+.evidence p{margin:0}
+
+/* ---- two faces block ---- */
+.faces{display:grid; gap:1px; background:var(--line); border-radius:14px; overflow:hidden; border:1px solid var(--line); margin:1.8rem 0}
+.faces > div{background:var(--surface); padding:1.3rem 1.35rem}
+.faces .cara-label{
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+  font-weight:600; margin-bottom:.55rem; display:block;
+}
+.faces .oscura .cara-label{color:var(--ocre)}
+.faces .clara .cara-label{color:var(--verde)}
+.faces p{font-size:.96rem; line-height:1.58; margin:0}
+
+/* ---- audit panel ---- */
+.audit{
+  background:var(--surface); border:1px dashed var(--line-strong); border-radius:14px;
+  padding:1.6rem 1.5rem; margin:2.6rem 0 1.4rem;
+}
+.audit h2{font-size:1.35rem; margin-bottom:1.1rem}
+.audit .audit-item{margin:0 0 1.05rem}
+.audit .audit-item:last-child{margin:0}
+.audit-tag{
+  display:inline-block; font-size:.64rem; letter-spacing:.12em; text-transform:uppercase;
+  font-weight:600; padding:.18rem .5rem; border-radius:6px; margin-bottom:.4rem;
+  background:var(--verde-soft); color:var(--verde);
+}
+.audit-tag.warn{background:var(--ocre-soft); color:var(--ocre)}
+.audit .audit-item p{font-size:.92rem; line-height:1.55; margin:0}
+
+/* ---- sources ---- */
+.src{padding-bottom:3.5rem}
+.src h2{font-size:1.35rem}
+.src ul{list-style:none; margin:0; padding:0; columns:1}
+.src li{
+  font-family:var(--mono); font-size:.78rem; line-height:1.5; color:var(--muted);
+  padding:.5rem 0; border-bottom:1px solid var(--line);
+}
+.src li b{color:var(--text); font-weight:600}
+
+/* ---- footer ---- */
+.foot{padding:2.4rem 0 4rem; text-align:center}
+.foot p{font-size:.9rem; color:var(--muted); font-style:italic; margin:0 auto; max-width:34rem}
+.foot .foot-mono{display:block; font-style:normal; font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; margin-top:1.2rem; color:var(--muted)}
+
+/* reveal */
+@media (prefers-reduced-motion:no-preference){
+  .reveal{opacity:0; transform:translateY(14px); animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1; transform:none}}
+}
+
+@media (min-width:620px){
+  .stat .fig{font-size:2.15rem}
+}
+@media (max-width:520px){
+  body{font-size:18px}
+  .tablero-idx{grid-template-columns:1fr}
+  .stat{flex-direction:column; gap:.4rem}
+}
+</style>
+</head>
+<body>
+<button class="toggle" id="tt" aria-label="Cambiar tema">Tema</button>
+
+<header class="hero">
+  <div class="wrap reveal">
+    <span class="eyebrow">Análisis de coyuntura · Julio 2026 · Lectura desde el Sur</span>
+    <h1>La partida por el siglo</h1>
+    <p class="subtitle">Cómo leer el mundo que se está reordenando — y por qué nos toca a todos</p>
+    <p class="byline">Mapa estratégico en cuatro tableros · Con fuentes y autoexamen · Se comparte para pensar, no para bajar línea</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="note">
+    <span class="kicker">Qué es esto y qué no es</span>
+    <p>No es un documento de partido ni un panfleto de nadie. Es un intento honesto de leer el tablero del mundo para que cualquier persona —vote como vote, crea lo que crea— pueda entender qué está pasando y decidir con lucidez, en lugar de tragarse las narrativas armadas de un lado y del otro.</p>
+    <p><strong>Está escrito desde el Sur</strong> — desde lo que vivimos y vemos aquí —, sin casarse con ningún bloque ni pelear con ninguno: mirando de frente nuestra propia realidad, con la brújula de la soberanía y la Tercera Vía. Todos los datos duros van con fuente al final. Al cierre, un <strong>autoexamen</strong> donde el propio texto se pone en duda. <em>Porque un análisis que no se audita a sí mismo no es análisis: es propaganda.</em></p>
+  </div>
+
+  <section style="border-top:none">
+    <span class="secnum">Para empezar</span>
+    <h2>El mapa viejo se rompió</h2>
+    <p>Durante casi un siglo nos enseñaron a leer la política del mundo como una pelea entre dos ideas: <strong>izquierda contra derecha, capitalismo contra comunismo.</strong> Ese mapa era cómodo. Y ya no sirve para orientarse.</p>
+    <p>Lo que está en disputa hoy no es principalmente una idea. Son <strong>cuatro cosas a la vez</strong>, superpuestas como cuatro tableros encima de la misma mesa:</p>
+
+    <div class="tablero-idx">
+      <div><span class="n">Tablero 01</span><h4>La infraestructura</h4><p>Quién controla los chips, la inteligencia artificial, la nube y los datos. El sistema operativo del poder.</p></div>
+      <div><span class="n">Tablero 02</span><h4>Los sistemas políticos</h4><p>Democracia liberal vs. capitalismo autoritario — y la democracia vaciada por dentro.</p></div>
+      <div><span class="n">Tablero 03</span><h4>La vida</h4><p>Los minerales, el agua, el territorio… y el planeta que se nos apaga.</p></div>
+      <div><span class="n">Tablero 04</span><h4>El futuro mismo</h4><p>Dos destinos opuestos — uno de pesadilla y uno luminoso. Y todavía se puede elegir.</p></div>
+    </div>
+
+    <p>Sobre esos tableros ya no juegan dos potencias, sino <strong>muchas</strong> — aunque, como veremos, sobre América Latina pesan sobre todo dos. Una advertencia de método: aquí no hay buenos ni malos absolutos. <strong>Hay intereses.</strong> Entender el juego no es escoger a quién aplaudir — es dejar de ser ficha.</p>
+  </section>
+
+  <section>
+    <span class="secnum">Los jugadores</span>
+    <h2>El mundo es multipolar (no una pelea de dos)</h2>
+    <p>La primera trampa, la más común, es creer que el mundo es un duelo entre Estados Unidos y China. No lo es. El poder se fragmentó en <strong>varios centros de gravedad</strong>, y esto es nuevo:</p>
+    <p>El bloque <strong>BRICS</strong> dejó de ser una sigla de foro y se volvió un polo real. En 2026 lo integran Brasil, Rusia, India, China, Sudáfrica, Egipto, Etiopía, Irán, Arabia Saudita, Emiratos e Indonesia — cerca del <strong>45% de la población</strong> del planeta y un tercio de la economía mundial. Otros trece países entraron como socios y unos cuarenta tocan la puerta. Su objetivo de fondo es concreto: <strong>dejar de depender del dólar</strong> para comerciar, y así volverse inmunes a las sanciones de Occidente. Con Arabia y Emiratos adentro, el bloque maneja cerca del <strong>40% del petróleo mundial.</strong></p>
+    <p>Rusia juega la carta energética y militar; los petro-Estados del Golfo negocian con todos a la vez; India juega el no-alineamiento; la Unión Europea intenta ser un polo propio por la vía de <em>regular</em> la tecnología… aunque con su propia sombra.</p>
+
+    <div class="pull">
+      <span class="tag">La precisión que importa</span>
+      El mundo es multipolar, pero la disputa <strong>por América Latina</strong> se concentra en dos gravedades — Washington y Pekín. Multipolar el planeta; casi bipolar el pulso por nuestra región.
+    </div>
+
+    <p>Y hay un jugador nuevo que casi nadie cuenta porque no es un país: <strong>las grandes corporaciones tecnológicas.</strong> Una de las mayores empresas de inteligencia artificial del mundo le ofreció al gobierno de EE.UU. el 5% de su propiedad — ya no se sabe dónde termina el Estado y empieza la empresa. El poder ya no vive solo en las capitales: vive en quién controla el software con el que el mundo piensa.</p>
+  </section>
+
+  <section>
+    <span class="secnum">Primer tablero</span>
+    <h2>La infraestructura: la guerra que de verdad decide todo</h2>
+    <p>Mientras los titulares hablan de discursos, la guerra que va a decidir el siglo se pelea en un terreno que casi nadie mira: <strong>los chips</strong> — esas piezas diminutas de silicio que hacen funcionar la inteligencia artificial. Quien controle el cerebro digital del mundo controla su economía, su guerra y su información.</p>
+    <p><strong>Estados Unidos juega a asfixiar.</strong> Usa su dominio sobre los chips más avanzados como un arma: le endureció a China las reglas de venta con aranceles y topes.</p>
+
+    <div class="stat">
+      <span class="fig">95% → ~0%</span>
+      <span class="txt"><span class="stat-label">Nvidia en el mercado chino</span>La reina mundial de estos chips pasó de dominar el 95% del mercado chino en 2024 a “prácticamente cero” en mayo de 2026. Si no te vendo el cerebro, no corres la carrera.</span>
+    </div>
+
+    <p><strong>China juega a no necesitarlos.</strong> Empujó a sus empresas a fabricar chips propios (la línea Ascend de Huawei), anunció <strong>295.000 millones de dólares</strong> para una red nacional de centros de datos, y en junio de 2026 su supercomputadora <em>LineShine</em> le arrebató a EE.UU. el primer puesto del mundo. Su apuesta no es el chip más perfecto — es <strong>inundar el planeta con tecnología “suficientemente buena” y barata</strong>, y volverse imposible de esquivar.</p>
+    <p>Y las dos apuestas tienen una cara oscura que nos toca directo: <strong>la máquina de vigilar.</strong> Existe una empresa llamada <strong>Palantir</strong> —nacida con dinero de la CIA— cuyo negocio es venderle a los gobiernos la capacidad de fusionar <em>todos</em> tus datos en un solo perfil de “riesgo”. Ya está en la región: Ecuador la metió en sus aduanas; en Argentina, su dueño se reunió con el gobierno. Pero el caso que debería quitarnos el sueño es de aquí:</p>
+
+    <div class="evidence">
+      <p>La Policía colombiana pagó <strong>11 millones de dólares</strong> por el software espía israelí <strong>Pegasus</strong> —capaz de entrar a tu celular sin que toques nada— y lo pagó <strong>en efectivo, con plata incautada al narcotráfico, para que no apareciera en las cuentas públicas</strong> (gobierno Duque, 2019). ¿Para espiar a quién? A líderes políticos y activistas.</p>
+    </div>
+
+    <p>No es ciencia ficción del futuro. Es el expediente de nuestro propio país.</p>
+  </section>
+
+  <section>
+    <span class="secnum">Segundo tablero</span>
+    <h2>Los sistemas políticos — y la trampa de la palabra “democracia”</h2>
+    <p>Aquí vuelve lo ideológico, pero —como hay que hacerlo hoy— <strong>bajo una lógica nueva.</strong> La vieja pelea “capitalismo contra comunismo” murió. La reemplazaron dos tensiones más sutiles.</p>
+    <h3 class="lead">La primera: democracia liberal contra capitalismo autoritario</h3>
+    <p>Durante décadas Occidente creyó una promesa — que al abrir su economía al mercado, un país pobre <em>tarde o temprano se volvería democrático</em>. China rompió esa promesa: combinó <strong>mercado feroz con partido único</strong> —lo que se llama “capitalismo autoritario”— y no solo no se democratizó: <strong>prosperó</strong>, y hoy <em>vende su modelo al mundo.</em> Su mensaje al Sur es tentador: <em>“la democracia electoral es lenta y caótica; nosotros ofrecemos orden, obras y crecimiento sin ese desgaste.”</em> El autoritarismo dejó de ser sinónimo de atraso — y ahí está su seducción peligrosa.</p>
+    <p>Frente a eso, uno esperaría una democracia liberal orgullosa. Pero aquí llega la pregunta incómoda:</p>
+
+    <div class="pull"><span class="tag">La pregunta que no se puede esquivar</span>¿De cuál democracia estamos hablando?</div>
+
+    <p>Porque la democracia realmente existente está enferma por dentro. Los estudiosos hablan de <strong>“posdemocracia”</strong>: sistemas donde todavía hay elecciones y discursos —la cáscara sigue— pero donde <strong>la gente intuye que su voto ya casi no decide nada.</strong> Las decisiones de fondo las toman los grandes poderes económicos; el dinero captura por dentro lo que las urnas deciden por fuera. Y hay una máquina nueva para vaciarla más rápido: <strong>la manipulación tecnológica del voto</strong> — en Eslovaquia (2023), audios y videos falsos con inteligencia artificial imitando voces de políticos ayudaron a ganar a un populista; en Argentina, la campaña se libró también a punta de <em>deepfakes</em>.</p>
+
+    <div class="stat">
+      <span class="fig">91 &gt; 88</span>
+      <span class="txt"><span class="stat-label">Autocracias vs. democracias · V-Dem 2025</span>Por primera vez desde 2002 hay más países autoritarios (91) que democráticos (88). Menos del 12% de la humanidad vive en una democracia plena — el nivel más bajo en cincuenta años.</span>
+    </div>
+
+    <h3 class="lead">La segunda: la reacción conservadora</h3>
+    <p>No todo el auge autoritario es económico o tecnológico; una parte es <strong>cultural y religiosa</strong>. En Occidente crece un <strong>nacionalismo cristiano</strong> que ya no se esconde: en EE.UU., cerca de un tercio de la población y más de la mitad de los votantes republicanos simpatizan con la idea de que la nación <em>debe</em> ser cristiana; el plan <em>Project 2025</em> propone una definición “bíblica” de familia y recortar derechos reproductivos y de las personas LGBTIQ+. No es solo gringo: hay conferencias nacional-conservadoras en Europa, y el fenómeno resuena en América Latina a través de bloques evangélicos con creciente peso electoral.</p>
+    <p>Conviene entenderlo sin caricatura, porque si no, no se combate. Este conservadurismo <strong>ofrece algo que la modernidad líquida quitó</strong>: identidad, pertenencia, sentido, un “nosotros” firme en un mundo que marea. Esa es su fuerza real. Su sombra es igual de real: <strong>usa ese anhelo de comunidad para desandar avances</strong> en igualdad de género y derechos, y para trazar una frontera entre “los nuestros” y “los otros”.</p>
+
+    <div class="pull"><span class="tag">La lectura de fondo</span>El mundo no está eligiendo entre una democracia sana y una autocracia. Muchas veces elige entre <strong>una autocracia eficiente y una democracia hueca</strong> — y le suma el combustible de una guerra cultural que convierte al vecino distinto en enemigo.</div>
+  </section>
+
+  <section>
+    <span class="secnum">Tercer tablero</span>
+    <h2>La vida: los minerales, el agua y el planeta que se nos apaga</h2>
+    <p>Toda esta pelea por chips, inteligencia artificial y poder necesita algo que no es virtual: <strong>materia.</strong> Y ahí América Latina entra al tablero — no como jugador, sino como <strong>premio.</strong></p>
+
+    <div class="stat">
+      <span class="fig">~60%</span>
+      <span class="txt"><span class="stat-label">Reservas de litio del mundo · América Latina</span>El “Triángulo del Litio” (Argentina, Bolivia, Chile) concentra cerca de la mitad; toda la región, cerca del 60%. El litio es el petróleo de la era de las baterías.</span>
+    </div>
+
+    <p>Y la jugada que casi nadie entiende: <strong>China no manda porque extrae — manda porque <em>procesa</em>.</strong> Refina cerca del 60% del litio y el 85–90% de las “tierras raras” del planeta, aunque el mineral se saque en otra parte. <em>Tener la mina no vale nada si otro tiene la refinería.</em> Estados Unidos despertó tarde y metió, desde 2025, más de mil millones de dólares en minerales de la región. Volvimos a ser cantera en disputa — como en el siglo del caucho, del banano y del petróleo.</p>
+    <p>Pero hay algo mucho más grande que los minerales, y es lo que casi nunca entra en los análisis fríos: <strong>el planeta mismo se está apagando, y América Latina lleva el bulto.</strong></p>
+    <p>Miremos el corazón del asunto — el <strong>Amazonas.</strong> No es “un pulmón” lejano: es una <strong>máquina de agua</strong> de la que dependen nueve países. La selva genera unos <strong>“ríos voladores”</strong>: autopistas de humedad que suben del Atlántico, cruzan la selva y llevan la lluvia hasta los Andes y buena parte de Sudamérica. Cuando se tumba el bosque, esos ríos del cielo se debilitan y <strong>deja de llover río abajo.</strong> Si se cruza el “punto de no retorno”, la selva empieza a volverse sabana seca. No es futurología: la sequía de 2023–2024, la peor registrada, hundió la cosecha de soya en Bolivia un 75% y arrasó cultivos en Perú.</p>
+
+    <div class="pull"><span class="tag">Cómo nos ven</span>Nos quieren de tres maneras, y en ninguna como fin: como <strong>cantera</strong> (los minerales), como <strong>mina de datos</strong> (la vigilancia) y como <strong>muro de contención</strong> (para frenar la migración). Nos exprimen y luego nos cercan por huir de lo que ellos ayudaron a romper.</div>
+  </section>
+
+  <section>
+    <span class="secnum">Cómo aterriza</span>
+    <h2>La doctrina y la ola</h2>
+    <p>¿Cómo se traduce este tablero global en la política que vemos en las noticias? En dos movimientos.</p>
+    <p><strong>El primero: una doctrina.</strong> En 2025, la Estrategia de Seguridad Nacional de Estados Unidos prometió, con esas palabras, <em>“reafirmar y hacer cumplir la Doctrina Monroe”</em> — la vieja idea del siglo XIX de que el hemisferio es patio reservado de Washington. La prensa la bautizó el <strong>“Corolario Trump”</strong> o <strong>“Doctrina Donroe”.</strong> Y no se quedó en papel: el 3 de enero de 2026, en una operación militar de dos horas y media, EE.UU. capturó al presidente de Venezuela, Nicolás Maduro, y se lo llevó a Nueva York. A Argentina le dio un rescate de 20.000 millones de dólares; a Ecuador le mandó tropas. La intervención directa volvió a la mesa.</p>
+    <p><strong>El segundo: una ola</strong> — el ascenso de gobiernos de extrema derecha en todo el mundo. No baja como una orden desde un solo lugar: es una <strong>corriente de fondo</strong> alimentada por el miedo económico, la democracia hueca y la guerra cultural.</p>
+
+    <div class="pull"><span class="tag">La clave para grabarse</span>El problema no es una persona. Es la estructura. Hoy la apuesta imperial es hostil y ruidosa; mañana puede llegar un gobierno de sonrisa amable y perseguir <strong>el mismo propósito con otras formas.</strong> El interés estructural sobrevive a los gobiernos de turno.</div>
+
+    <div class="stat">
+      <span class="fig">49,66 / 48,70</span>
+      <span class="txt"><span class="stat-label">Colombia · Segunda vuelta · 21-jun-2026</span>Abelardo de la Espriella ganó la presidencia por menos de un punto sobre Iván Cepeda, con respaldo de Trump y la votación más alta de la historia del país.</span>
+    </div>
+
+    <p>Léase sin pasión de bando: Colombia entra al corredor alineado con Washington, y el riesgo no es el golpe de Estado del pasado, sino algo más silencioso — la vigilancia que llega de a poco, el aparato judicial usado contra opositores, la mano dura normalizada. Pero ganó con <strong>mandato mínimo</strong>, sin mayorías cómodas y con economía frágil que lo obliga a negociar. La institucionalidad todavía amortigua. <strong>El juego sigue abierto.</strong></p>
+  </section>
+
+  <section>
+    <span class="secnum">La salida</span>
+    <h2>No es escoger amo: es sembrar soberanía</h2>
+    <p>Si todo lo anterior parece una condena, aquí está la otra mitad — la que casi nadie cuenta. Si la línea que de verdad divide el tablero no es <em>izquierda contra derecha</em>, sino <strong>soberanía contra dependencia</strong>, entonces la pregunta deja de ser “¿con China o con Estados Unidos?”. La verdadera es: <strong>¿cómo no nos dejamos digerir por ninguno?</strong> Y ya hay respuestas concretas:</p>
+    <p><strong>Soberanía tecnológica de verdad.</strong> En febrero de 2026 se lanzó <strong>Latam-GPT</strong>, el primer modelo de inteligencia artificial <em>abierto y propio</em> de América Latina — liderado por Chile, con más de treinta instituciones de ocho países, entrenado con nuestra lengua y nuestra historia. No para competir con los gigantes, sino para <strong>no depender de ellos.</strong> El Sur Global está construyendo sus propias herramientas — y se puede.</p>
+    <p><strong>El código abierto como trinchera.</strong> Que lo público funcione con software libre impide el “secuestro tecnológico” de empresas como Palantir. <strong>Cuidar el territorio es cuidar la soberanía — y la vida:</strong> si las potencias pelean por nuestros minerales y nuestra agua, defender la tierra se vuelve un asunto de poder, no solo de ecología.</p>
+
+    <div class="pull"><span class="tag">El cierre del argumento</span>El mundo se está volviendo nacionalista, individualista, de fortaleza sitiada — <em>“los míos primero, que se salve el que pueda”.</em> Se dejó de <strong>pensar como especie.</strong> Volver a nombrar lo común no es tibieza entre dos extremos: es el otro eje, el que hace la pregunta que de verdad importa cuando todos gritan “¿quién gana?” — <strong>¿cómo sobrevivimos todos?</strong></div>
+  </section>
+
+  <section>
+    <span class="secnum">Cuarto tablero</span>
+    <h2>Las dos caras del futuro: el borde donde estamos parados</h2>
+    <p>Terminemos donde el análisis frío no suele llegar, pero donde de verdad se juega todo. Si este juego sigue como va, no desemboca en un punto medio gris. Desemboca en <strong>dos futuros opuestos</strong> — y estamos justo en el filo entre los dos.</p>
+
+    <div class="stat">
+      <span class="fig">18,3 billones</span>
+      <span class="txt"><span class="stat-label">Riqueza milmillonaria mundial · 2025 · Oxfam</span>Solo su <em>aumento</em> de ese año casi igualó toda la riqueza de la mitad más pobre de la humanidad — 4.100 millones de personas — mientras una de cada cuatro no come bien.</span>
+    </div>
+
+    <div class="faces">
+      <div class="oscura">
+        <span class="cara-label">La cara oscura</span>
+        <p>Ese dinero se vuelve poder político directo: en la última elección de EE.UU., uno de cada seis dólares salió de cien familias multimillonarias; seis personas controlan nueve de las diez mayores redes sociales. Súmele la máquina de vigilar y tiene el retrato del futuro que asoma: <strong>“gobiernos mente-colmena”</strong> — poblaciones vigiladas, clasificadas y empujadas como un enjambre, para el beneficio de unos pocos; desigualdad monstruosa; un planeta que se apaga mientras el Sur lleva el bulto. No es distopía de película: es la línea recta de lo que ya está pasando.</p>
+      </div>
+      <div class="clara">
+        <span class="cara-label">La cara luminosa</span>
+        <p>Nunca la humanidad tuvo tanto poder para hacer el bien: para curar, para conectar, para entender el cosmos, para sacar a millones de la miseria. Las mismas herramientas que pueden vigilarnos pueden liberarnos, si decidimos quién las gobierna. Somos —hasta donde sabemos— <strong>el único punto del universo donde la materia despertó y se puso a pensarse a sí misma.</strong> Polvo de estrellas que aprendió a amar y a cuidar. Ese milagro está hoy en peligro — pero todavía en nuestras manos.</p>
+      </div>
+    </div>
+
+    <div class="pull"><span class="tag">Ahí estamos parados</span>En el borde. De un lado, el abismo del enjambre y la cantera saqueada. Del otro, la posibilidad —nunca antes tan al alcance— de una civilización que use su poder para cuidar la vida en vez de devorarla. Esa incertidumbre no es motivo de parálisis: <strong>es la razón por la que lo que cada quien haga, desde donde esté, importa.</strong></div>
+  </section>
+
+  <section>
+    <span class="secnum">Cierre</span>
+    <h2>La semilla</h2>
+    <p>Somos el jardinero en vísperas de tormenta. No controlamos el clima —ni el de Washington, ni el de Pekín, ni el de Bogotá—. Pero podemos conocer nuestro terreno mejor que nadie.</p>
+    <p>El mundo se está reordenando en una partida por el sistema operativo del poder, y a los pueblos del Sur nos tocó, otra vez, el papel de cantera. La trampa más vieja es creer que solo podemos escoger amo. La jugada digna es otra: <strong>entender el tablero completo para no ser ficha de nadie</strong>, y sembrar —en el territorio, en el dato, en la vida, en la organización de la gente— una soberanía que no dependa de que gane el bueno de turno.</p>
+    <p>El juego no es ganarle a la tormenta. Es <strong>estar vivos, organizados y lúcidos cuando escampe</strong> — sin haber traicionado, en el camino, lo único que de verdad nos hace humanos: que todavía somos capaces de pensar en la casa común, y de defender ese milagro improbable que es la vida despierta.</p>
+    <p><em>Ese es el mapa. Lo que se siembre con él, ya es decisión de cada quien.</em></p>
+  </section>
+
+  <div class="audit">
+    <h2>Autoexamen crítico</h2>
+    <p style="font-size:.9rem;color:var(--muted);margin:-.4rem 0 1.3rem">El texto se pone en duda a sí mismo. Un análisis que no se audita es propaganda.</p>
+
+    <div class="audit-item">
+      <span class="audit-tag">Verificado y sólido</span>
+      <p>La guerra de chips y las cifras de Nvidia/Huawei; el dominio chino en el <em>procesamiento</em> de minerales; la expansión de los BRICS; el expediente Pegasus en Colombia; Palantir en Ecuador y Argentina; la Doctrina Monroe en la Estrategia de Seguridad de EE.UU. 2025; la captura de Maduro; el triunfo de De la Espriella (cifras exactas); los datos de V-Dem; el “capitalismo autoritario” y la “posdemocracia”; el nacionalismo cristiano y <em>Project 2025</em>; los ríos voladores y la sequía amazónica 2023–24; las cifras de Oxfam; Latam-GPT; los <em>deepfakes</em> de Eslovaquia y Argentina.</p>
+    </div>
+    <div class="audit-item">
+      <span class="audit-tag warn">Interpretación, no hecho</span>
+      <p>Que la disputa “ya no es de ideologías sino de infraestructura, sistemas, vida y futuro” es un <strong>lente</strong> — ilumina, pero deja sombras. Que “soberanía vs. dependencia” sea el eje principal es una apuesta analítica. La idea del “punto de no retorno” amazónico tiene matices: la ciencia más reciente habla de zonas vulnerables, no de un colapso único instantáneo de toda la selva — el riesgo es real, pero conviene no exagerar la certeza. El §7 (las dos caras) es deliberadamente filosófico: una invitación, no un pronóstico.</p>
+    </div>
+    <div class="audit-item">
+      <span class="audit-tag warn">Lo que no se pudo verificar</span>
+      <p>No se halló un caso <em>colombiano</em> comprobado de <em>deepfake</em> pagado por extranjeros; por eso se usan Eslovaquia y Argentina, que sí están documentados. Si alguien lo afirma de Colombia, pedir la fuente.</p>
+    </div>
+    <div class="audit-item">
+      <span class="audit-tag">El sesgo a vigilar</span>
+      <p>Este texto tiene una postura (soberanía, bien común, cuidado de la vida). La regla que lo mantiene honesto: <strong>si un dato contradice la tesis, se revisa la tesis — nunca al revés.</strong> Las dos caras de cada moneda —la sombra de Occidente <em>y</em> la de China; la crítica a la democracia hueca <em>y</em> el rechazo a la autocracia— están puestas a propósito, para leerse de lado y lado.</p>
+    </div>
+  </div>
+
+  <section class="src">
+    <h2>Fuentes</h2>
+    <ul>
+      <li><b>Chips y tecnología EE.UU.–China:</b> CNBC · Mayer Brown · Geopolitical Monitor · TOP500 (jun-2026).</li>
+      <li><b>Multipolaridad / BRICS:</b> Carnegie Endowment · Clingendael · Eurasia Review · Modern Diplomacy.</li>
+      <li><b>Sistemas políticos:</b> JSTOR Daily y China-US Focus (“capitalismo autoritario”) · Foreign Policy · International IDEA y Carnegie (“posdemocracia”).</li>
+      <li><b>Reacción conservadora:</b> PRRI American Values Atlas 2025 · Kettering Foundation e Interfaith Alliance (<em>Project 2025</em>) · Sage Journals · CNN.</li>
+      <li><b>Vigilancia:</b> teleSUR / Orinoco Tribune (Palantir) · Consorcio Al Sur (2025) · Haaretz, Times of Israel, Latin America Reports (Pegasus Colombia).</li>
+      <li><b>Doctrina Monroe / Corolario Trump:</b> Estrategia de Seguridad Nacional EE.UU. 2025 (Chatham House, Atlantic Council, Foreign Affairs) · ABC News.</li>
+      <li><b>Captura de Maduro:</b> House of Commons Library · Congressional Research Service · Al Jazeera · CBS.</li>
+      <li><b>Elección Colombia 2026:</b> Wikipedia · Al Jazeera · PBS.</li>
+      <li><b>Minerales críticos:</b> TIME · White &amp; Case · MINING.COM · RUSI · ODI.</li>
+      <li><b>Planeta / Amazonas:</b> Mongabay · Amazon Conservation Association / MAAP #232 · Science Panel for the Amazon.</li>
+      <li><b>Desigualdad / tecnofeudalismo:</b> Oxfam (informe 2026 sobre 2025) · LSE Inequalities · Fair Observer.</li>
+      <li><b>Deepfakes electorales:</b> Harvard Misinformation Review · AI Incident Database · Munich Security Conference.</li>
+      <li><b>Democracia:</b> V-Dem, Democracy Report 2025 y 2026.</li>
+      <li><b>Soberanía digital:</b> Brookings · Euronews · bne IntelliNews (Latam-GPT).</li>
+    </ul>
+  </section>
+
+  <div class="foot">
+    <p>Documento de trabajo. Se comparte para pensar, no para bajar línea. Las correcciones, los desacuerdos y las preguntas son bienvenidos.</p>
+    <span class="foot-mono">Análisis de coyuntura · Julio 2026 · Lectura desde el Sur</span>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  var root=document.documentElement, btn=document.getElementById('tt');
+  function current(){
+    var s=root.getAttribute('data-theme');
+    if(s) return s;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  }
+  btn.addEventListener('click',function(){
+    var next=current()==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+  });
+})();
+</script>
+</body>
+</html>
